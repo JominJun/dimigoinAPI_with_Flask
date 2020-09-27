@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="No-Cache">
+    <meta http-equiv="refresh" content="600; URL=http://127.0.0.1:5000">
+
+    <script type="text/javascript">
+        let speak = (text) => {
+            window.speechSynthesis.cancel()
+
+            const speechMsg = new SpeechSynthesisUtterance()
+            speechMsg.rate = 1
+            speechMsg.pitch = 1
+            speechMsg.lang = "ko-KR"
+            speechMsg.text = text
+            speechMsg.volume = 1
+
+            console.log(speechMsg)
+
+            window.speechSynthesis.speak(speechMsg)
+        }
+
+        function startTimer(time, idx) {
+            let hour, min, sec;
+
+            let timer = setInterval(function () {
+              hour = parseInt(time/3600);
+              min = parseInt(parseInt(time/60)%60);
+              sec = time % 60;
+
+              document.getElementById("laundryLeftTime"+idx).innerHTML
+                  = hour + "<span style='font-size: 15px'>시간 </span>" +
+                  min + "<span style='font-size: 15px'>분 </span>" +
+                  sec + "<span style='font-size: 15px'>초 </span>";
+
+              time--;
+
+              if (time < 0) {
+                clearInterval(timer);
+                document.getElementById("laundryLeftTime"+idx).innerHTML = "빨래하세요!!";
+                const header = document.getElementById("laundryLeftTime"+idx).parentNode.parentNode
+                //header.parentNode.removeChild(header)
+              }
+            }, 1000);
+        }
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/index.css') }}">
+    <style>
+        html, body{
+            margin: 0
+        }
+    </style>
+    <title>DIMI JA-SEUB</title>
+</head>
+<body>
+    <img id="logo" src="https://i.imgur.com/OjEkXk9.png">
+
+    <div id="ingang">
+        {% if ingangList %}
+            {% for person in ingangList %}
+                <div>
+                    예약자{{ loop.index }}: {{ person }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div>
+                오늘은 인강실 가는 사람이 없네!?!?!?
+            </div>
+        {% endif %}
+    </div>
+
+    <div id="laundry">
+        {% for person in laundryList %}
+            {% if loop.first %}
+                <div class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"
+                onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                <div class="laundryLeft" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"></div>
+                <div class="laundryRight">
+            {% else %}
+                <div class="laundryBox" style="border-top-left-radius: 0px; border-top-right-radius: 0px"
+                onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                <div class="laundryLeft" style="border-top-left-radius: 0px; border-top-right-radius: 0px;"></div>
+                <div class="laundryRight" style="border-top: 1px solid #eee;">
+            {% endif %}
+                    <div class="laundryTitle">
+                        <div style="float: left">{{ person.name }}</div>
+                    </div>
+                    <div class="laundryContent">
+                        <div class="laundryContentText">{{ person.time }}에 빨래를 예약하셨습니다</div>
+                    </div>
+                </div>
+                {% if not loop.last %}
+                    <div class="laundryLeftTime" style="border-bottom: 1px solid #eee;">
+                {% else %}
+                    <div class="laundryLeftTime">
+                {% endif %}
+                    <div id="laundryLeftTime{{ loop.index }}" class="laundryLeftTimeContent">
+                        Loading...
+                    </div>
+                    <script>startTimer({{ person.left_time }}, {{ loop.index }})</script>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
