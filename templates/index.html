@@ -9,6 +9,7 @@
 
     <script type="text/javascript">
         let speak = (text) => {
+            console.log(text)
             window.speechSynthesis.cancel()
 
             const speechMsg = new SpeechSynthesisUtterance()
@@ -46,6 +47,26 @@
               }
             }, 1000);
         }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            if (ev.target.id == "div1"){
+                document.getElementById(data).parentNode.removeChild(document.getElementById(data));
+            } else {
+                try {
+                    ev.target.appendChild(document.getElementById(data));
+                } catch(e) { }
+            }
+        }
     </script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/index.css') }}">
@@ -59,11 +80,15 @@
 <body>
     <img id="logo" src="https://i.imgur.com/OjEkXk9.png">
 
+    <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+
+    </div>
+
     <div id="ingang">
         {% if ingangList %}
             {% for person in ingangList %}
                 <div>
-                    예약자{{ loop.index }}: {{ person }}
+                    {{ person }}
                 </div>
             {% endfor %}
         {% else %}
@@ -73,25 +98,25 @@
         {% endif %}
     </div>
 
-    <div id="laundry">
+    <div id="laundry" ondrop="drop(event)" ondragover="allowDrop(event)">
         {% if laundryList %}
             {% for person in laundryList %}
                 {% if loop.first %}
-                    <div class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"
-                    onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                    <div id="laundryBox{{ loop.index }}" class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;" draggable="true" ondragstart="drag(event)"
+                    onclick="speak(document.getElementById('laundryTitle{{ loop.index }}').innerText +'님, 빨래하러 이동할 시간입니다')">
                     <div class="laundryLeft" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"></div>
                     <div class="laundryRight">
                 {% else %}
                     <div class="laundryBox" style="border-top-left-radius: 0px; border-top-right-radius: 0px"
-                    onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                    onclick="speak(document.getElementById('laundryTitle{{ loop.index }}').innerText +'님, 빨래하러 이동할 시간입니다')">
                     <div class="laundryLeft" style="border-top-left-radius: 0px; border-top-right-radius: 0px;"></div>
                     <div class="laundryRight" style="border-top: 1px solid #eee;">
                 {% endif %}
-                        <div class="laundryTitle">
+                        <div id="laundryTitle{{ loop.index }}" class="laundryTitle">
                             {{ person.name }}
                         </div>
                         <div class="laundryContent">
-                            <div class="laundryContentText">{{ person.time }}에 빨래를 예약하셨습니다</div>
+                            <div id="laundryContentText{{ loop.index }}" class="laundryContentText">{{ person.hour }}시 {{ person.minute }}분에 빨래를 예약하셨습니다</div>
                         </div>
                     </div>
                     {% if not loop.last %}
@@ -107,15 +132,16 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div class="laundryBox">
+            <div class="laundryBox"
+            onclick="speak(document.getElementById('laundryLeftTimeNONE').innerText)">
                 <div class="laundryLeft"></div>
                 <div class="laundryRight">
                     <div class="laundryTitle">
                         오늘은 신청자가 없어요
                     </div>
                     <div class="laundryContent">
-                        <div class="laundryContentText">
-                            헉!! 무슨 일이지??
+                        <div id="laundryLeftTimeNONE" class="laundryContentText">
+                            오늘은 신청자가 없다고 합니다
                         </div>
                     </div>
                 </div>

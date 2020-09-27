@@ -17,9 +17,18 @@ def index():
     for washer in laundryList:
         for person in washer:
             if person.get("serial") is not None and '15' in person.get("serial")[0:2]:
-                reserved_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day, int(person.get("time").split("시")[0]))
+                reserved_time = datetime.datetime(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day, person.get("hour"), person.get("minute"))
                 left_time = (reserved_time - datetime.datetime.now()).seconds if reserved_time > datetime.datetime.now() else 0
-                processedLaundryList.append({"time": person.get("time"), "left_time": left_time, "name": person.get("name")})
+                processedLaundryList.append({"hour": person.get("hour"), "minute": person.get("minute"), "left_time": left_time, "name": person.get("name")})
+
+    arr = list()
+
+    for person in ingangList:
+         arr.append(person.get("name"))
+
+
+    arr = set(arr)
+    print(arr)
 
     return render_template("index.html", ingangList=ingangList, laundryList=processedLaundryList)
 

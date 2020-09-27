@@ -58,13 +58,21 @@ def dimigoLife_LaundryList(access_token):
     for machine in machine_list:
         for applier in machine.get("applies"):
             if applier.get("user") is not None:
-                array.append({"time": str(int(applier.get("time")[11:13])+9)+"시", "name": str(applier.get("user")).split("'")[5], "serial": str(applier.get("user")).split("'")[8].split(" ")[1].split("}")[0]})
+                array.append({
+                    "hour": int(applier.get("time")[11:13])+9,
+                    "minute": int(applier.get("time")[14:16]),
+                    "name": str(applier.get("user")).split("'")[5],
+                    "serial": str(applier.get("user")).split("'")[8].split(" ")[1].split("}")[0]
+                })
             else:
-                array.append({"time": str(int(applier.get("time")[11:13]) + 9) + "시"})
+                array.append({
+                    "hour": int(applier.get("time")[11:13]) + 9,
+                    "minute": int(applier.get("time")[14:16])
+                })
 
     for element in enumerate(array):
-        prev = int(str(array[element[0]-1].get('time')).split('시')[0])
-        now = int(str(element[1].get('time').split('시')[0]))
+        prev = array[element[0]-1].get('hour')
+        now = element[1].get('hour')
         passCon = True if not element[0] else False if element[0] == len(array)-1 else prev < now
 
         if passCon:
@@ -74,3 +82,5 @@ def dimigoLife_LaundryList(access_token):
             temp = list()
 
     return result
+
+dimigoLife_LaundryList(dimigoLife_Login())
