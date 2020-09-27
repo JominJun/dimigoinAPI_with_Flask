@@ -57,6 +57,11 @@ body {
   display: none;
 }
 
+#ingang {
+  width: 420px;
+  float: left;
+}
+
 #laundry {
   width: 420px;
   float: left;

@@ -42,7 +42,7 @@
                 clearInterval(timer);
                 document.getElementById("laundryLeftTime"+idx).innerHTML = "빨래하세요!!";
                 const header = document.getElementById("laundryLeftTime"+idx).parentNode.parentNode
-                //header.parentNode.removeChild(header)
+                // header.parentNode.removeChild(header) 테스트 하느라 잠시 꺼둠
               }
             }, 1000);
         }
@@ -74,37 +74,53 @@
     </div>
 
     <div id="laundry">
-        {% for person in laundryList %}
-            {% if loop.first %}
-                <div class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"
-                onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
-                <div class="laundryLeft" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"></div>
+        {% if laundryList %}
+            {% for person in laundryList %}
+                {% if loop.first %}
+                    <div class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"
+                    onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                    <div class="laundryLeft" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"></div>
+                    <div class="laundryRight">
+                {% else %}
+                    <div class="laundryBox" style="border-top-left-radius: 0px; border-top-right-radius: 0px"
+                    onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
+                    <div class="laundryLeft" style="border-top-left-radius: 0px; border-top-right-radius: 0px;"></div>
+                    <div class="laundryRight" style="border-top: 1px solid #eee;">
+                {% endif %}
+                        <div class="laundryTitle">
+                            {{ person.name }}
+                        </div>
+                        <div class="laundryContent">
+                            <div class="laundryContentText">{{ person.time }}에 빨래를 예약하셨습니다</div>
+                        </div>
+                    </div>
+                    {% if not loop.last %}
+                        <div class="laundryLeftTime" style="border-bottom: 1px solid #eee;">
+                    {% else %}
+                        <div class="laundryLeftTime">
+                    {% endif %}
+                        <div id="laundryLeftTime{{ loop.index }}" class="laundryLeftTimeContent">
+                            Loading...
+                        </div>
+                        <script>startTimer({{ person.left_time }}, {{ loop.index }})</script>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="laundryBox">
+                <div class="laundryLeft"></div>
                 <div class="laundryRight">
-            {% else %}
-                <div class="laundryBox" style="border-top-left-radius: 0px; border-top-right-radius: 0px"
-                onclick="speak(document.getElementById('laundryLeftTime{{ loop.index }}').parentNode.parentNode.childNodes[3].childNodes[1].childNodes[1].innerHTML+'님, 빨래하러 이동할 시간입니다')">
-                <div class="laundryLeft" style="border-top-left-radius: 0px; border-top-right-radius: 0px;"></div>
-                <div class="laundryRight" style="border-top: 1px solid #eee;">
-            {% endif %}
                     <div class="laundryTitle">
-                        <div style="float: left">{{ person.name }}</div>
+                        오늘은 신청자가 없어요
                     </div>
                     <div class="laundryContent">
-                        <div class="laundryContentText">{{ person.time }}에 빨래를 예약하셨습니다</div>
+                        <div class="laundryContentText">
+                            헉!! 무슨 일이지??
+                        </div>
                     </div>
-                </div>
-                {% if not loop.last %}
-                    <div class="laundryLeftTime" style="border-bottom: 1px solid #eee;">
-                {% else %}
-                    <div class="laundryLeftTime">
-                {% endif %}
-                    <div id="laundryLeftTime{{ loop.index }}" class="laundryLeftTimeContent">
-                        Loading...
-                    </div>
-                    <script>startTimer({{ person.left_time }}, {{ loop.index }})</script>
                 </div>
             </div>
-        {% endfor %}
+        {% endif %}
     </div>
 </body>
 </html>
