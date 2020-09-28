@@ -171,11 +171,6 @@
                             </div>
                         </div>
                     </div>
-                {% else %}
-                    <div>
-                        현재 시간에 인강실 신청한 사람이 없네?!??!
-                    </div>
-                    {% break %}
                 {% endif %}
             {% endfor %}
         {% else %}
@@ -241,6 +236,7 @@
 
         $("#toiletAddButton").click(() => {
             let inp = prompt("이름을 입력해주세요")
+            inp = inp.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+|\-/g, "");
             if (inp){
                 $("#toilet").append("<div id='toiletBox"+toiletCnt+"' class='toiletBox' draggable='true' ondragstart='drag(event)'>\
                     <div class='toiletLeft'></div> \
@@ -263,6 +259,7 @@
 
         $("#waterAddButton").click(() => {
             let inp = prompt("이름을 입력해주세요")
+            inp = inp.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+|\-/g, "");
             if (inp){
                 $("#water").append("<div id='waterBox"+waterCnt+"' class='waterBox' draggable='true' ondragstart='drag(event)'>\
                     <div class='waterLeft'></div> \
@@ -285,7 +282,9 @@
 
         $("#etcAddButton").click(() => {
             let inp = prompt("이름을 입력해주세요")
+            inp = inp.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+|\-/g, "");
             let inp2 = prompt("이동하는 장소를 말해주세요")
+            inp2 = inp2.replace(/\<|\>|\"|\'|\%|\;|\(|\)|\&|\+|\-/g, "");
             if (inp && inp2){
                 $("#etc").append("<div id='etcBox"+etcCnt+"' class='etcBox' draggable='true' ondragstart='drag(event)'>\
                     <div class='etcLeft'></div> \

@@ -3,7 +3,6 @@ from APIs import API as api
 import datetime
 
 app = Flask(__name__)
-app.jinja_env.add_extension('jinja2.ext.loopcontrols')
 
 @app.route('/')
 def index():
