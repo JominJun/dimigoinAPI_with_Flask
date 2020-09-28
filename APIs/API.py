@@ -1,7 +1,7 @@
 import json, requests, http.client
 
 # 계정 정보
-with open('APIS/account.json') as account:
+with open('APIs/account.json') as account:
     account = json.load(account)
     id, pw = account["id"], account["pw"]
 
@@ -82,5 +82,3 @@ def dimigoLife_LaundryList(access_token):
             temp = list()
 
     return result
-
-dimigoLife_LaundryList(dimigoLife_Login())

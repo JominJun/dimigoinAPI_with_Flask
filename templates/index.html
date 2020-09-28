@@ -7,6 +7,7 @@
     <meta http-equiv="Cache-Control" content="No-Cache">
     <meta http-equiv="refresh" content="600; URL=http://127.0.0.1:5000">
 
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script type="text/javascript">
         let speak = (text) => {
             console.log(text)
@@ -29,43 +30,58 @@
 
             let timer = setInterval(function () {
               hour = parseInt(time/3600);
-              min = parseInt(parseInt(time/60)%60);
+              min = parseInt(parseInt(time/60) % 60);
               sec = time % 60;
 
-              document.getElementById("laundryLeftTime"+idx).innerHTML
+              try{
+                  document.getElementById("laundryLeftTime"+idx).innerHTML
                   = hour + "<span style='font-size: 15px'>시간 </span>" +
                   min + "<span style='font-size: 15px'>분 </span>" +
                   sec + "<span style='font-size: 15px'>초 </span>";
 
-              time--;
+                  time--;
+              }catch (e){
+                  clearInterval(timer)
+              }
+
 
               if (time < 0) {
-                clearInterval(timer);
-                document.getElementById("laundryLeftTime"+idx).innerHTML = "빨래하세요!!";
-                const header = document.getElementById("laundryLeftTime"+idx).parentNode.parentNode
-                // header.parentNode.removeChild(header) 테스트 하느라 잠시 꺼둠
+                try{
+                    clearInterval(timer);
+                    document.getElementById("laundryLeftTime"+idx).innerHTML = "빨래하세요!!";
+                    const header = document.getElementById("laundryLeftTime"+idx).parentNode.parentNode
+                    header.parentNode.removeChild(header)
+                }  catch (e) {}
               }
             }, 1000);
         }
+
+        let originParent = ""
 
         function allowDrop(ev) {
             ev.preventDefault();
         }
 
         function drag(ev) {
+            originParent = ev.target.parentNode.id
             ev.dataTransfer.setData("text", ev.target.id);
         }
 
         function drop(ev) {
-            ev.preventDefault();
-            var data = ev.dataTransfer.getData("text");
-            if (ev.target.id == "div1"){
-                document.getElementById(data).parentNode.removeChild(document.getElementById(data));
-            } else {
-                try {
-                    ev.target.appendChild(document.getElementById(data));
-                } catch(e) { }
-            }
+            try{
+                ev.preventDefault();
+                let data = ev.dataTransfer.getData("text");
+                if (ev.target.id === "trashbin"){
+                    document.getElementById(data).parentNode.removeChild(document.getElementById(data));
+                } else {
+                    //console.log(ev.target.id, originParent)
+                    try {
+                        if (ev.target.id === originParent){
+                            ev.target.appendChild(document.getElementById(data));
+                        }
+                    } catch(e) { }
+                }
+            }catch(e) { }
         }
     </script>
 
@@ -78,18 +94,44 @@
     <title>DIMI JA-SEUB</title>
 </head>
 <body>
-    <img id="logo" src="https://i.imgur.com/OjEkXk9.png">
+    <div id="trashbin" ondrop="drop(event)" ondragover="allowDrop(event)"> </div>
 
-    <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+    인강실<br>
+    물<br>
+    화장실<br>
+    방과후실<br>
 
+    <div id="water"  ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div id="waterAddButton"></div>
     </div>
 
-    <div id="ingang">
+    <div id="ingang" ondrop="drop(event)" ondragover="allowDrop(event)">
         {% if ingangList %}
             {% for person in ingangList %}
-                <div>
-                    {{ person }}
-                </div>
+                {% if now_time in person.time %}
+                    <div id="ingangBox{{ loop.index }}" class="ingangBox" draggable="true" ondragstart="drag(event)">
+                        <div class="ingangLeft" ondragstart="return false"></div>
+                        <div class="ingangRight" ondragstart="return false">
+                            <div id="ingangTitle{{ loop.index }}" class="ingangTitle">
+                                {{ person.name }}
+                            </div>
+                            <div class="ingangContent">
+                                <div id="ingangContentText{{ loop.index }}" class="ingangContentText">
+                                    {% for i in person.time %}
+                                        {% if loop.last %}{{ i }}타임 인강실 예약하셨습니다
+                                        {% else %}{{ i }},
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div>
+                        현재 시간에 인강실 신청한 사람이 없네?!??!
+                    </div>
+                    {% break %}
+                {% endif %}
             {% endfor %}
         {% else %}
             <div>
@@ -101,15 +143,13 @@
     <div id="laundry" ondrop="drop(event)" ondragover="allowDrop(event)">
         {% if laundryList %}
             {% for person in laundryList %}
-                {% if loop.first %}
-                    <div id="laundryBox{{ loop.index }}" class="laundryBox" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;" draggable="true" ondragstart="drag(event)"
+                <div id="laundryBox{{ loop.index }}" class="laundryBox"
+                    draggable="true" ondragstart="drag(event)"
                     onclick="speak(document.getElementById('laundryTitle{{ loop.index }}').innerText +'님, 빨래하러 이동할 시간입니다')">
-                    <div class="laundryLeft" style="border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;"></div>
+                <div class="laundryLeft"></div>
+                {% if loop.first %}
                     <div class="laundryRight">
                 {% else %}
-                    <div class="laundryBox" style="border-top-left-radius: 0px; border-top-right-radius: 0px"
-                    onclick="speak(document.getElementById('laundryTitle{{ loop.index }}').innerText +'님, 빨래하러 이동할 시간입니다')">
-                    <div class="laundryLeft" style="border-top-left-radius: 0px; border-top-right-radius: 0px;"></div>
                     <div class="laundryRight" style="border-top: 1px solid #eee;">
                 {% endif %}
                         <div id="laundryTitle{{ loop.index }}" class="laundryTitle">
@@ -148,5 +188,32 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+        cnt = 0
+
+        $("#waterAddButton").click(() => {
+            let inp = prompt("이름을 입력해주세요")
+            if (inp){
+                $("#water").append("<div id='waterBox"+cnt+"' class='waterBox' draggable='true' ondragstart='drag(event)'>\
+                    <div class='waterLeft'></div> \
+                    <div class='waterRight'>\
+                        <div class='waterTitle'>\
+                            "+inp+"\
+                        </div>\
+                        <div class='waterContent'>\
+                            <div class='waterContentText'>\
+                                🎵 깊은 산 속 옹달샘 누가 왔다 가나요 🎵\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>");
+
+                cnt++;
+            }else{
+                alert("이름이 없어요~~")
+            }
+        });
+    </script>
 </body>
 </html>
